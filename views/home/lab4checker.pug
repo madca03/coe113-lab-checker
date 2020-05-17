@@ -1,0 +1,15 @@
+extends ../layout
+
+block content
+  h1= title
+  
+  .container
+    form(action="/lab4checker", method="POST", enctype="multipart/form-data")
+      .form-row.justify-content-center
+        .col-4.custom-file
+          input.custom-file-input#customFile(type="file", name="rtlFile", accept=".zip")
+          label.custom-file-label(for="customFile") Choose file
+        .col-4
+          button.btn.btn-primary#rtlSubmit(type="submit") Submit file
+
+  script(src="./javascripts/fileupload.js")
