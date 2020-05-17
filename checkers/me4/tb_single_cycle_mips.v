@@ -78,7 +78,7 @@ module tb_single_cycle_mips();
         .inst(inst),
         .data_in(proc_data_in),
         .data_out(proc_data_out),
-        .mem_write(data_wr),
+        .data_wr(data_wr),
         .inst_addr(inst_addr),
         .data_addr(data_addr)
     );
