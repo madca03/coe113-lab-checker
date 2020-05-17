@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import subprocess
 import shlex
 import os
@@ -10,7 +11,10 @@ if __name__ == '__main__':
     pass
 
   tb_file = 'tb_single_cycle_mips.v'
-  compile_command = "iverilog -o simv {} ../rtl/*.v ../memory/*.v".format(tb_file)
+  verilog_files = [f for f in os.listdir('.') if os.path.isfile(f) and f.endswith('.v')]
+  verilog_files = ' '.join(verilog_files)
+
+  compile_command = "iverilog -o simv {}".format(verilog_files)
   compile_command = shlex.split(compile_command)
   
   p = subprocess.Popen(compile_command, stdout=subprocess.PIPE)

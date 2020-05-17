@@ -2,7 +2,7 @@
 const fs = require("fs-extra");
 const util = require("util");
 const path = require("path");
-const { exec } = require("child_process");
+const child_process = require("child_process");
 const streamZip = require("node-stream-zip");
 
 exports.index = (req, res, next) => {
@@ -14,6 +14,7 @@ exports.index = (req, res, next) => {
 exports.showlab4checker = (req, res, next) => {
   res.render("home/lab4checker", {
     title: "CoE113 ME4 checker",
+    results: null
   });
 };
 
@@ -102,6 +103,7 @@ exports.lab4checker = async (req, res, next) => {
           zip.close();
 
           const removeZipFile = util.promisify(fs.unlink);
+          const rtlDir = path.join(newUploadDirPath, "rtl")
 
           try {
             await removeZipFile(newZipFilePath);
@@ -109,10 +111,38 @@ exports.lab4checker = async (req, res, next) => {
             throw err;
           }
 
-          copyLab4CheckerToNewRTLDir(newUploadDirPath);
-          runLab4Checker(newUploadDirPath);
+          try {
+            await copyLab4CheckerToNewRTLDir(rtlDir);
+          } catch (err) {
+            throw err;
+          }
 
-          res.json({ fields: req.file });
+          runLab4Checker(rtlDir)
+            .then((checkerResponse) => {
+              const result = checkerResponse.stdout.split("\n")
+                                .filter((line) => line.length)
+                                .map(line => line.split(" "))
+                                .map(line => {
+                                  const grade = line[2].split("/").map(e => parseInt(e));
+                                  
+                                  return {
+                                    "inst": line[0],
+                                    "passed": line[1] === 'PASSED' ? true : false,
+                                    "score": grade[0],
+                                    "test_length": grade[1]
+                                  };
+                                })
+        
+              console.log(result);
+
+              res.render("home/lab4checker", {
+                title: "CoE113 ME4 checker",
+                results: result
+              });
+            })
+            .catch(err => {
+              throw err;
+            });
         });
       }
     });
@@ -147,19 +177,11 @@ async function copyLab4CheckerToNewRTLDir(dirPath) {
   }
 }
 
-function runLab4Checker(dirPath) {
-  const cwd = path.join(dirPath, "sim");
-  console.log(cwd);
-
-  const command = "python run.py";
+async function runLab4Checker(dirPath) {
+  const cwd = path.join(dirPath);
   const options = { cwd: cwd };
 
-  exec(command, options, (err, stdout, stderr) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.log(`stderr: ${stderr}`);
-  });
+  const runPythonChecker = util.promisify(child_process.execFile);
+  return runPythonChecker("python3", ["run.py"], options)
 }
+
