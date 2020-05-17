@@ -14,7 +14,7 @@ exports.index = (req, res, next) => {
 exports.showlab4checker = (req, res, next) => {
   res.render("home/lab4checker", {
     title: "CoE113 ME4 checker",
-    results: null
+    results: null,
   });
 };
 
@@ -30,7 +30,7 @@ exports.lab4checker = async (req, res, next) => {
 
     await renameToOriginalFileName(oldPath, newPath);
   } catch (err) {
-    throw err;
+    console.log(err);
   }
 
   try {
@@ -40,7 +40,7 @@ exports.lab4checker = async (req, res, next) => {
 
     await createNewDirectory(pathName, options);
   } catch (err) {
-    throw err;
+    console.log(err);
   }
 
   try {
@@ -57,7 +57,7 @@ exports.lab4checker = async (req, res, next) => {
     });
 
     zip.on("error", (err) => {
-      throw err;
+      console.log(err);
     });
 
     const topLevelMipsVerilogFile = path.join("rtl", "single_cycle_mips.v");
@@ -103,51 +103,52 @@ exports.lab4checker = async (req, res, next) => {
           zip.close();
 
           const removeZipFile = util.promisify(fs.unlink);
-          const rtlDir = path.join(newUploadDirPath, "rtl")
+          const rtlDir = path.join(newUploadDirPath, "rtl");
 
           try {
             await removeZipFile(newZipFilePath);
           } catch (err) {
-            throw err;
+            console.log(err);
           }
 
           try {
             await copyLab4CheckerToNewRTLDir(rtlDir);
           } catch (err) {
-            throw err;
+            console.log(err);
           }
 
           runLab4Checker(rtlDir)
             .then((checkerResponse) => {
-              const result = checkerResponse.stdout.split("\n")
-                                .filter((line) => line.length)
-                                .map(line => line.split(" "))
-                                .map(line => {
-                                  const grade = line[2].split("/").map(e => parseInt(e));
-                                  
-                                  return {
-                                    "inst": line[0],
-                                    "passed": line[1] === 'PASSED' ? true : false,
-                                    "score": grade[0],
-                                    "test_length": grade[1]
-                                  };
-                                })
-        
+              const result = checkerResponse.stdout
+                .split("\n")
+                .filter((line) => line.length)
+                .map((line) => line.split(" "))
+                .map((line) => {
+                  const grade = line[2].split("/").map((e) => parseInt(e));
+
+                  return {
+                    inst: line[0],
+                    passed: line[1] === "PASSED" ? true : false,
+                    score: grade[0],
+                    test_length: grade[1],
+                  };
+                });
+
               console.log(result);
 
               res.render("home/lab4checker", {
                 title: "CoE113 ME4 checker",
-                results: result
+                results: result,
               });
             })
-            .catch(err => {
-              throw err;
+            .catch((err) => {
+              console.log(err);
             });
         });
       }
     });
   } catch (err) {
-    throw err;
+    console.log(err);
   }
 };
 
@@ -163,7 +164,7 @@ async function deleteNewUploadDir(dirPath) {
   try {
     await rmdir(dirPath, { recursive: true });
   } catch (err) {
-    throw err;
+    console.log(err);
   }
 }
 
@@ -173,7 +174,7 @@ async function copyLab4CheckerToNewRTLDir(dirPath) {
   try {
     await fs.copy(checkerPath, dirPath);
   } catch (err) {
-    throw err;
+    console.log(err);
   }
 }
 
@@ -182,6 +183,5 @@ async function runLab4Checker(dirPath) {
   const options = { cwd: cwd };
 
   const runPythonChecker = util.promisify(child_process.execFile);
-  return runPythonChecker("python3", ["run.py"], options)
+  return runPythonChecker("python3", ["run.py"], options);
 }
-
