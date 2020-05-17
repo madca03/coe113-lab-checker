@@ -4,7 +4,7 @@
 // `define SDF
 `define IVERILOG
 
-`define DEL_IN  7
+`define DEL_IN  7*14
 `define WORD_WIDTH  32
 `define MEM_ADDR_WIDTH 32
 `define CLK_PERIOD  50
@@ -63,10 +63,9 @@ module tb_single_cycle_mips();
     wire [`WORD_WIDTH - 1:0] inst;                  // 32-bit instruction (from instruction memory)
     wire [`WORD_WIDTH - 1:0] proc_data_in;          // data from memory to processor
     wire [`WORD_WIDTH - 1:0] proc_data_out;         // data from processor to memory
-    wire mem_write;                                 // data memory write enable
-    wire mem_read;                                  // data memory read enable
     wire [`MEM_ADDR_WIDTH - 1:0] inst_addr;         // program counter
     wire [`MEM_ADDR_WIDTH - 1:0] data_addr;         // data memory address
+    wire data_wr;                                   // write data signal of data memory
 
     wire [5:0] inst_opcode;
     wire [5:0] inst_funct;
@@ -79,8 +78,7 @@ module tb_single_cycle_mips();
         .inst(inst),
         .data_in(proc_data_in),
         .data_out(proc_data_out),
-        .mem_write(mem_write),
-        .mem_read(mem_read),
+        .mem_write(data_wr),
         .inst_addr(inst_addr),
         .data_addr(data_addr)
     );
@@ -91,8 +89,7 @@ module tb_single_cycle_mips();
 
     datamem D1 (.clk(clk),
         .data_addr(data_addr),
-        .mem_write(mem_write),
-        .mem_read(mem_read),
+        .data_wr(data_wr),
         .data_in(proc_data_out),
         .data_out(proc_data_in)
     );
