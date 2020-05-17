@@ -1,11 +1,27 @@
 extends ../layout
 
 block content
-  h1= title
-  p Welcome to #{title} (by: Mark Allen Agaton & Fredrick Angelo Galapon)
-  p We are creating an online automated checker for the CoE 113 laboratory exercises. If you've found any bugs or if you have any comments or suggestions, you can reach us via email.
-  ul
-    li mark.allen.agaton@eee.upd.edu.ph
-      img(src="/images/Agaton.jpg")
-    li fredrick.galapon@eee.upd.edu.ph
-      img(src="/images/Galapon.jpg")
+  .jumbotron
+    h1= title
+    p.lead Welcome to #{title} online automated checker (by: Mark Allen Agaton & Fredrick Angelo Galapon)
+    hr.my-4
+    p We are creating an online automated checker for the CoE 113 laboratory exercises. If you've found any bugs or if you have any comments or suggestions, you can reach us via email.
+    
+    .container
+      .row.justify-content-center
+        .col-7
+          .card-deck
+            .card
+              img.card-img-top(src="/images/Agaton.jpg", alt="Mark Allen Agaton")
+              .card-body
+                h5.card-title Mark Allen Agaton
+                p.card-text 
+                  a(href="mailto:mark.allen.agaton@eee.upd.edu.ph")
+                    | mark.allen.agaton@eee.upd.edu.ph
+            .card
+              img.card-img-top(src="/images/Galapon.jpg", alt="Fredrick Angelo Galapon")
+              .card-body
+                h5.card-title Fredrick Angelo Galapon
+                p.card-text 
+                  a(href="mailto:fredrick.galapon@eee.upd.edu.ph")
+                    | fredrick.galapon@eee.upd.edu.ph
