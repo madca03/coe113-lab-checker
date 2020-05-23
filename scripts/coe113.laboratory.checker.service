@@ -1,0 +1,10 @@
+[Unit]
+Description=CoE 113 Laboratory Checker Application
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/bin/sh /usr/local/bin/run_coe113_labchecker_app.sh
+
+[Install]
+WantedBy=multi-user.target
