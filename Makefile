@@ -8,6 +8,4 @@ install-service:
 	@systemctl start coe113.laboratory.checker.service
 	@echo "Displaying status of service in 10 secs..."
 	@sleep 10
-	systemctl status coe113.laborator.checker.service
-
-	scripts/coe113.laboratory.checker.service
+	systemctl status coe113.laboratory.checker.service
