@@ -86,14 +86,16 @@ exports.lab4checker = async (req, res, next) => {
         // console.log(`Entry ${entry.name}: ${desc}`);
       }
 
-      if (!hasRTLDirInZipFile) {
+      if (!hasRTLDirInZipFile || !hasTopLevelMipsVerilogFile) {
         deleteNewUploadDir(newUploadDirPath);
-        res.json({ status: "rtl folder was not found in your zip file " });
       }
 
-      if (!hasTopLevelMipsVerilogFile) {
-        deleteNewUploadDir(newUploadDirPath);
-
+      if (!hasRTLDirInZipFile) {
+        res.render("home/lab4checkerResultError", {
+          title: renderConstants.ME4_TITLE,
+          errorMessageTitle: renderConstants.ME4.MISSING_RTL_FOLDER
+        });
+      } else if (!hasTopLevelMipsVerilogFile) {
         res.render("home/lab4checkerResultError", {
           title: renderConstants.ME4_TITLE,
           errorMessageTitle: renderConstants.ME4.MISSING_TOP_LEVEL_MODULE
