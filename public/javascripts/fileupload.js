@@ -18,8 +18,16 @@ function init() {
     const zipfilename = filename[filename.length - 1];
 
     if (zipfilename !== "rtl.zip") {
-      console.log("wrong filename");
       e.preventDefault();
+      const errorMessageTextNode = document.createTextNode("Wrong zip filename. Filename should be rtl.zip");
+      const divAlert = document.createElement("div");
+      divAlert.classList.add("alert");
+      divAlert.classList.add("alert-danger");
+      divAlert.setAttribute("role", "alert");
+      divAlert.appendChild(errorMessageTextNode);
+      
+      const parentElem = document.querySelector("ul.list-group").parentElement
+      parentElem.insertBefore(divAlert, parentElem.firstChild)
     }
   });
 }

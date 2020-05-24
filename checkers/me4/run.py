@@ -11,7 +11,7 @@ PYTHON_EXIT_STATUSCODE_IVERILOG_PROCESS_COMPILATION_ERROR   = 2
 
 VVP_PROCESS_STATUS_TIMEOUT = 400
 VVP_PROCESS_STATUS_SUCCESS = 0
-VVP_TIMEOUT_SECONDS = 2 # allowable simulation time
+VVP_TIMEOUT_SECONDS = 1 # allowable simulation time
 
 IVERILOG_PROCESS_STATUS_SUCCESS = 0
 
@@ -100,7 +100,8 @@ if __name__ == '__main__':
   vvp = execute_vvp()
 
   if (vvp['status'] == VVP_PROCESS_STATUS_TIMEOUT):
-    print("Error: Simulation ran indefinitely for {} seconds".format(VVP_TIMEOUT_SECONDS), file=sys.stderr)
+    print("Error: Simulation ran indefinitely for {} second{}".format(VVP_TIMEOUT_SECONDS,
+      's' if VVP_TIMEOUT_SECONDS > 1 else ''), file=sys.stderr)
     exit(PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT)
 
   if (vvp['status'] == VVP_PROCESS_STATUS_SUCCESS):
