@@ -93,8 +93,10 @@ exports.lab4checker = async (req, res, next) => {
 
       if (!hasTopLevelMipsVerilogFile) {
         deleteNewUploadDir(newUploadDirPath);
-        res.json({
-          status: `${topLevelMipsVerilogFile} was not found in your zip file`,
+
+        res.render("home/lab4checkerResultError", {
+          title: renderConstants.ME4_TITLE,
+          errorMessageTitle: renderConstants.ME4.MISSING_TOP_LEVEL_MODULE
         });
       }
 

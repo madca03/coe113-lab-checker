@@ -16,7 +16,8 @@ block content
               - for (let i = 0; i < errorMessage.length; i++)
                 li.list-group-item.list-group-item-light.list-group-item-action= errorMessage[i]
             - else
-              li.list-group-item.list-group-item-light.list-group-item-action= errorMessage
+              - if (errorMessageTitle === 'Simulation Timeout')
+                li.list-group-item.list-group-item-light.list-group-item-action= errorMessage
 
           .container(style="margin: 1rem 0")
             a(href="/lab4checker")
