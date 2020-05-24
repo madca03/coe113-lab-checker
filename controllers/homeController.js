@@ -4,16 +4,18 @@ const util = require("util");
 const path = require("path");
 const child_process = require("child_process");
 const streamZip = require("node-stream-zip");
+const me4PythonCheckerStatusCodes = require("../constants/ME4PythonCheckerStatusCodes.js");
+const renderConstants = require("../constants/renderConstants.js")
 
 exports.index = (req, res, next) => {
   res.render("home/index", {
-    title: "CoE 113 Laboratory",
+    title: renderConstants.HOME_TITLE,
   });
 };
 
 exports.showlab4checker = (req, res, next) => {
   res.render("home/lab4checker", {
-    title: "CoE 113 ME4 checker",
+    title: renderConstants.ME4_TITLE,
     results: null,
   });
 };
@@ -119,38 +121,58 @@ exports.lab4checker = async (req, res, next) => {
 
           runLab4Checker(rtlDir)
             .then((checkerResponse) => {
-              console.log(checkerResponse);
+              // console.log(checkerResponse);
 
               const result = checkerResponse.stdout
                 .split("\n")
-                .filter((line) => line.length)
-                .map((line) => line.split(" "))
-                .map((line) => {
-                  const grade = line[2].split("/").map((e) => parseInt(e));
+                .filter((instructionResult) => instructionResult.length)
+                .map((instructionResult) => instructionResult.split(" "))
+                .map((instructionResult) => {
+                  const grade = instructionResult[2]
+                    .split("/")
+                    .map((e) => parseInt(e));
 
                   return {
-                    inst: line[0],
-                    passed: line[1] === "PASSED" ? true : false,
+                    inst: instructionResult[0],
+                    passed: instructionResult[1] === "PASSED" ? true : false,
                     score: grade[0],
                     test_length: grade[1],
                   };
                 });
 
+              res.render("home/lab4checkerResultSuccess", {
+                title: renderConstants.ME4_TITLE,
+                results: result,
+              });
+            })
+            .catch((error) => {
+              let errorMessage = null;
+              let errorMessageTitle = null;
+
+              if (error.code === me4PythonCheckerStatusCodes.IVERILOG_PROCESS_COMPILATION_ERROR) {
+                errorMessage = error.stderr.split('\n').filter(x => x.length);
+                errorMessageTitle = renderConstants.ME4.COMPILE_ERROR
+              }
+              else if (error.code === me4PythonCheckerStatusCodes.VVP_PROCESS_TIMEOUT) {
+                errorMessage = error.stderr;
+                errorMessageTitle = renderConstants.ME4.SIMULATION_TIMEOUT
+              }
+
+              res.render("home/lab4checkerResultError", {
+                title: renderConstants.ME4_TITLE,
+                errorMessageTitle,
+                errorMessage,
+              });
+            })
+            .finally(() => {
               // remove created directory inside uploads after simulation run
               const removeSimulationDirectory = util.promisify(fs.rmdir);
               const simulationPathDirectory = newUploadDirPath;
               const options = { recursive: true };
-              removeSimulationDirectory(simulationPathDirectory, options)
-                .then(() => {
-                  res.render("home/lab4checker", {
-                    title: "CoE113 ME4 checker",
-                    results: result,
-                  });
-                })
-                .catch((error) => console.log(error));
-            })
-            .catch((err) => {
-              console.log(err);
+              removeSimulationDirectory(
+                simulationPathDirectory,
+                options
+              ).catch((error) => console.log(error));
             });
         });
       }
@@ -188,8 +210,7 @@ async function copyLab4CheckerToNewRTLDir(dirPath) {
 
 async function runLab4Checker(dirPath) {
   const cwd = path.join(dirPath);
-  const simulationTimeout = 3;
-  const options = { cwd: cwd, timeout: simulationTimeout };
+  const options = { cwd: cwd };
 
   const runPythonChecker = util.promisify(child_process.execFile);
   return runPythonChecker("python3", ["run.py"], options);

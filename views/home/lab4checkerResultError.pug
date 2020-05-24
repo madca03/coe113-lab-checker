@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+  .container
+    .row.justify-content-center
+      .card(style="width:70%")
+        .card-header
+          p.text-center.text-dark(style="font-size:3rem")= title
+        .card-body
+
+          .container
+            .alert.alert-danger(role="alert")= errorMessageTitle
+          
+          - if (Array.isArray(errorMessage))
+            .container
+              ul.list-group
+              - for (let i = 0; i < errorMessage.length; i++)
+                li.list-group-item.list-group-item-light.list-group-item-action= errorMessage[i]
+
+            .container(style="margin: 1rem 0")
+              a(href="/lab4checker")
+                button.btn.btn-primary(type="button") Back to form

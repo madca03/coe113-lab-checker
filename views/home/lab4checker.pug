@@ -3,56 +3,33 @@ extends ../layout
 block content
   .container
     .row.justify-content-center
-      .card
+      .card(style="width:70%")
         .card-header
-          h1= title
+          p.text-center.text-dark(style="font-size:3rem")= title
         .card-body
 
         - if (results === null || results.length === 0)
-          h4.card-title Instructions on how to use this checker:
-          ul
-            li Upload a zip file containing your RTL files only.
-            li The name for the zip file should be 
-              span rtl.zip
-              |.
-            li The zip file should contain one directory named 
-              span rtl 
-              | which should contain all of your RTL files
-            li Inside that rtl directory, there should be a verilog file named 
-              span single_cycle_mips.v
+          .container(style="margin-bottom:1rem")
+            ul.list-group
+              li.list-group-item.list-group-item-dark.text-center 
+                span.h4 Instructions on how to use this checker
+              li.list-group-item.list-group-item-light.list-group-item-action 1. Upload a zip file containing your RTL files only.
+              li.list-group-item.list-group-item-light.list-group-item-action 2. The name for the zip file should be 
+                strong rtl.zip
+              li.list-group-item.list-group-item-light.list-group-item-action 3. The zip file should contain 
+                strong one directory named rtl 
+                | which should contain all of your RTL files
+              li.list-group-item.list-group-item-light.list-group-item-action 4. Inside that rtl directory, there should be a verilog file named 
+                strong single_cycle_mips.v
 
-          .container
+          .container(style="margin-bottom:1rem")
             form(action="/lab4checker", method="POST", enctype="multipart/form-data")
               .form-row.justify-content-center
-                .col-4
+                .col-5
                   .custom-file
                     input.custom-file-input#customFile(type="file", name="rtlFile", accept=".zip")
                     label.custom-file-label(for="customFile") Choose file
-                  .container
-                    .row
-                      button.btn.btn-primary#rtlSubmit(type="submit") Submit file
+                  
+                button.btn.btn-primary#rtlSubmit(type="submit") Submit file
           
-
-              
-
-        - if (results !== null && results.length)
-          .container
-            table.table.table-hover
-              thead
-                tr
-                  th Instruction
-                  th Passed / Failed
-                  th # of test cases passed
-                  th # of test cases
-              tbody
-                - for (let result of results)
-                  tr
-                    td= result.inst
-                    td= result.passed ? "Pass" : "Fail"
-                    td= result.score
-                    td= result.test_length
-            
-            a(href="/lab4checker")
-              button.btn.btn-primary(type="button") Back to form
-
   script(src="./javascripts/fileupload.js")
