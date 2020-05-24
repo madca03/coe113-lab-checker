@@ -4,7 +4,7 @@ const util = require("util");
 const path = require("path");
 const child_process = require("child_process");
 const streamZip = require("node-stream-zip");
-const me4PythonCheckerStatusCodes = require("../constants/ME4PythonCheckerStatusCodes.js");
+const me4PythonCheckerConstants = require("../constants/me4PythonCheckerConstants.js");
 const renderConstants = require("../constants/renderConstants.js")
 
 exports.index = (req, res, next) => {
@@ -153,11 +153,11 @@ exports.lab4checker = async (req, res, next) => {
               let errorMessage = null;
               let errorMessageTitle = null;
 
-              if (error.code === me4PythonCheckerStatusCodes.IVERILOG_PROCESS_COMPILATION_ERROR) {
+              if (error.code === me4PythonCheckerConstants.STATUS.IVERILOG_PROCESS_COMPILATION_ERROR) {
                 errorMessage = error.stderr.split('\n').filter(x => x.length);
                 errorMessageTitle = renderConstants.ME4.COMPILE_ERROR
               }
-              else if (error.code === me4PythonCheckerStatusCodes.VVP_PROCESS_TIMEOUT) {
+              else if (error.code === me4PythonCheckerConstants.STATUS.VVP_PROCESS_TIMEOUT) {
                 errorMessage = error.stderr;
                 errorMessageTitle = renderConstants.ME4.SIMULATION_TIMEOUT
               }
