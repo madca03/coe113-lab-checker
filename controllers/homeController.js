@@ -136,6 +136,15 @@ exports.lab4checker = async (req, res, next) => {
 
               console.log(result);
 
+              // remove created directory inside uploads after simulation run
+              const removeSimulationDirectory = util.promisify(fs.rmdir);
+              const simulationPathDirectory = newUploadDirPath;
+              const options = { recursive: true };
+              removeSimulationDirectory(
+                simulationPathDirectory,
+                options
+              ).catch((error) => console.log(error));
+
               res.render("home/lab4checker", {
                 title: "CoE113 ME4 checker",
                 results: result,
