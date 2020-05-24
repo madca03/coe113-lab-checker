@@ -19,7 +19,7 @@ exports.showlab4checker = (req, res, next) => {
 };
 
 exports.lab4checker = async (req, res, next) => {
-  console.log(req.file);
+  // console.log(req.file);
 
   const uploadsDirPath = path.join(__dirname, "..", "uploads");
 
@@ -66,7 +66,7 @@ exports.lab4checker = async (req, res, next) => {
     let hasTopLevelMipsVerilogFile = false;
 
     zip.on("ready", () => {
-      console.log(`Entries read: ${zip.entriesCount}`);
+      // console.log(`Entries read: ${zip.entriesCount}`);
 
       // read the contents of the zip file before extraction
       for (const entry of Object.values(zip.entries())) {
@@ -81,7 +81,7 @@ exports.lab4checker = async (req, res, next) => {
         }
 
         const desc = entry.isDirectory ? "directory" : `${entry.size} bytes`;
-        console.log(`Entry ${entry.name}: ${desc}`);
+        // console.log(`Entry ${entry.name}: ${desc}`);
       }
 
       if (!hasRTLDirInZipFile) {
@@ -99,7 +99,7 @@ exports.lab4checker = async (req, res, next) => {
       // extract zip file if it's valid
       if (hasRTLDirInZipFile && hasTopLevelMipsVerilogFile) {
         zip.extract(null, newUploadDirPath, async (err, count) => {
-          console.log(err ? "Extract error" : `Extracted ${count} entries`);
+          // console.log(err ? "Extract error" : `Extracted ${count} entries`);
           zip.close();
 
           const removeZipFile = util.promisify(fs.unlink);
@@ -119,6 +119,8 @@ exports.lab4checker = async (req, res, next) => {
 
           runLab4Checker(rtlDir)
             .then((checkerResponse) => {
+              console.log(checkerResponse);
+
               const result = checkerResponse.stdout
                 .split("\n")
                 .filter((line) => line.length)
@@ -134,21 +136,18 @@ exports.lab4checker = async (req, res, next) => {
                   };
                 });
 
-              console.log(result);
-
               // remove created directory inside uploads after simulation run
               const removeSimulationDirectory = util.promisify(fs.rmdir);
               const simulationPathDirectory = newUploadDirPath;
               const options = { recursive: true };
-              removeSimulationDirectory(
-                simulationPathDirectory,
-                options
-              ).catch((error) => console.log(error));
-
-              res.render("home/lab4checker", {
-                title: "CoE113 ME4 checker",
-                results: result,
-              });
+              removeSimulationDirectory(simulationPathDirectory, options)
+                .then(() => {
+                  res.render("home/lab4checker", {
+                    title: "CoE113 ME4 checker",
+                    results: result,
+                  });
+                })
+                .catch((error) => console.log(error));
             })
             .catch((err) => {
               console.log(err);
@@ -189,7 +188,8 @@ async function copyLab4CheckerToNewRTLDir(dirPath) {
 
 async function runLab4Checker(dirPath) {
   const cwd = path.join(dirPath);
-  const options = { cwd: cwd };
+  const simulationTimeout = 3;
+  const options = { cwd: cwd, timeout: simulationTimeout };
 
   const runPythonChecker = util.promisify(child_process.execFile);
   return runPythonChecker("python3", ["run.py"], options);

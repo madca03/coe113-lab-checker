@@ -3,6 +3,7 @@ import subprocess
 import shlex
 import os
 import time
+import sys
 
 PYTHON_EXIT_STATUSCODE_SIMULATION_SUCCESS                   = 0
 PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT                  = 1
@@ -37,7 +38,7 @@ def print_iverilog_compilation_errors(process_stderr):
 
     if len(missing_ports):
       for port in missing_ports:
-        print("Missing {0} port in {1}.v module".format(port, SINGLE_CYCLE_MIPS_MODULE_NAME))
+        print("Missing {0} port in {1}.v module".format(port, SINGLE_CYCLE_MIPS_MODULE_NAME), file=sys.stderr)
 
 def print_vvp_results(process_stdout):
   with process_stdout as f:
@@ -99,7 +100,7 @@ if __name__ == '__main__':
   vvp = execute_vvp()
 
   if (vvp['status'] == VVP_PROCESS_STATUS_TIMEOUT):
-    print("Error: Simulation ran indefinitely for {} seconds".format(VVP_TIMEOUT_SECONDS))
+    print("Error: Simulation ran indefinitely for {} seconds".format(VVP_TIMEOUT_SECONDS), file=sys.stderr)
     exit(PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT)
 
   if (vvp['status'] == VVP_PROCESS_STATUS_SUCCESS):
