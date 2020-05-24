@@ -2,6 +2,9 @@ install-service:
 	@mkdir -p /var/log/coe113labchecker
 	@chmod +x ./scripts/*.sh
 	@cp scripts/*.sh /usr/local/bin
+	@cp nginx/*.conf /etc/nginx/conf.d
+	nginx -t
+	@nginx -s reload
 	@cp scripts/*.service /etc/systemd/system
 	@systemctl daemon-reload
 	@systemctl enable coe113.laboratory.checker.service
