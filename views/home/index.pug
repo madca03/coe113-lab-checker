@@ -3,13 +3,13 @@ extends ../layout
 block content
   .jumbotron
     h1= title
-    p.lead Welcome to #{title} online automated checker (by: Mark Allen Agaton & Fredrick Angelo Galapon)
+    p.lead Welcome to #{title} online automated checker
     hr.my-4
     p We are creating an online automated checker for the CoE 113 laboratory exercises. If you've found any bugs or if you have any comments or suggestions, you can reach us via email.
     
     .container
       .row.justify-content-center
-        .col-7
+        .col-12
           .card-deck
             .card
               img.card-img-top(src="/images/Agaton.jpg", alt="Mark Allen Agaton")
@@ -25,3 +25,10 @@ block content
                 p.card-text 
                   a(href="mailto:fredrick.galapon@eee.upd.edu.ph")
                     | fredrick.galapon@eee.upd.edu.ph
+            .card
+              img.card-img-top(src="/images/Densing.jpg", alt="Chris Vincent Densing, MS")
+              .card-body
+                h5.card-title Chris Vincent Densing, MS
+                p.card-text 
+                  a(href="mailto:chris.densing@eee.upd.edu.ph")
+                    | chris.densing@eee.upd.edu.ph
