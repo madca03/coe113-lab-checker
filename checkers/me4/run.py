@@ -5,15 +5,21 @@ import os
 import time
 import sys
 
-PYTHON_EXIT_STATUSCODE_SIMULATION_SUCCESS                   = 0
-PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT                  = 1
-PYTHON_EXIT_STATUSCODE_IVERILOG_PROCESS_COMPILATION_ERROR   = 2
+class EXIT_STATUS:
+  SIMULATION_SUCCESS = 0
+  VVP_PROCESS_TIMEOUT = 1
+  IVERILOG_PROCESS_COMPILATION_ERROR = 2
 
-VVP_PROCESS_STATUS_TIMEOUT = 400
-VVP_PROCESS_STATUS_SUCCESS = 0
-VVP_TIMEOUT_SECONDS = 1 # allowable simulation time
+class VVP_PROCESS:
+  class STATUS:
+    TIMEOUT = 400
+    SUCCESS = 0
 
-IVERILOG_PROCESS_STATUS_SUCCESS = 0
+  TIMEOUT_SECONDS = 1 # allowable simulation time
+
+class IVERILOG_PROCESS:
+  class STATUS:
+    SUCCESS = 0
 
 GENERATED_SIMULATION_FILE = "simv"
 SINGLE_CYCLE_MIPS_TESTBENCH_INSTANCE_NAME = "UUT"
@@ -73,9 +79,9 @@ def execute_vvp():
   vvp_process = subprocess.Popen(vvp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   try:
-    vvp_process_status = vvp_process.wait(timeout = VVP_TIMEOUT_SECONDS)
+    vvp_process_status = vvp_process.wait(timeout = VVP_PROCESS.TIMEOUT_SECONDS)
   except:
-    vvp_process_status = VVP_PROCESS_STATUS_TIMEOUT
+    vvp_process_status = VVP_PROCESS.STATUS.TIMEOUT
     vvp_process.kill()
 
   return {
@@ -93,17 +99,17 @@ if __name__ == '__main__':
 
   iverilog = execute_iverilog()
 
-  if (iverilog['status'] != IVERILOG_PROCESS_STATUS_SUCCESS):
+  if (iverilog['status'] != IVERILOG_PROCESS.STATUS.SUCCESS):
     print_iverilog_compilation_errors(iverilog['stderr'])
-    exit(PYTHON_EXIT_STATUSCODE_IVERILOG_PROCESS_COMPILATION_ERROR)
+    exit(EXIT_STATUS.IVERILOG_PROCESS_COMPILATION_ERROR)
 
   vvp = execute_vvp()
 
-  if (vvp['status'] == VVP_PROCESS_STATUS_TIMEOUT):
-    print("Error: Simulation ran indefinitely for {} second{}".format(VVP_TIMEOUT_SECONDS,
-      's' if VVP_TIMEOUT_SECONDS > 1 else ''), file=sys.stderr)
-    exit(PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT)
+  if (vvp['status'] == VVP_PROCESS.STATUS.TIMEOUT):
+    print("Error: Simulation ran indefinitely for {} second{}".format(VVP_PROCESS.TIMEOUT_SECONDS,
+      's' if VVP_PROCESS.TIMEOUT_SECONDS > 1 else ''), file=sys.stderr)
+    exit(EXIT_STATUS.VVP_PROCESS_TIMEOUT)
 
-  if (vvp['status'] == VVP_PROCESS_STATUS_SUCCESS):
+  if (vvp['status'] == VVP_PROCESS.STATUS.SUCCESS):
     print_vvp_results(vvp['stdout'])
-    exit(PYTHON_EXIT_STATUSCODE_SIMULATION_SUCCESS)
+    exit(EXIT_STATUS.SIMULATION_SUCCESS)
