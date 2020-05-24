@@ -4,30 +4,104 @@ import shlex
 import os
 import time
 
-if __name__ == '__main__':
-  try:
-    os.remove("simv")
-  except FileNotFoundError:
-    pass
+PYTHON_EXIT_STATUSCODE_SIMULATION_SUCCESS                   = 0
+PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT                  = 1
+PYTHON_EXIT_STATUSCODE_IVERILOG_PROCESS_COMPILATION_ERROR   = 2
 
-  tb_file = 'tb_single_cycle_mips.v'
-  verilog_files = [f for f in os.listdir('.') if os.path.isfile(f) and f.endswith('.v')]
-  verilog_files = ' '.join(verilog_files)
+VVP_PROCESS_STATUS_TIMEOUT = 400
+VVP_PROCESS_STATUS_SUCCESS = 0
+VVP_TIMEOUT_SECONDS = 2 # allowable simulation time
 
-  compile_command = "iverilog -o simv {}".format(verilog_files)
-  compile_command = shlex.split(compile_command)
-  
-  p = subprocess.Popen(compile_command, stdout=subprocess.PIPE)
-  p_status = p.wait()
+IVERILOG_PROCESS_STATUS_SUCCESS = 0
 
-  vvp_command = shlex.split("vvp simv")
-  with subprocess.Popen(vvp_command, stdout=subprocess.PIPE) as proc:
-    for line in proc.stdout:
-      line = line.decode()
+GENERATED_SIMULATION_FILE = "simv"
+SINGLE_CYCLE_MIPS_TESTBENCH_INSTANCE_NAME = "UUT"
+SINGLE_CYCLE_MIPS_MODULE_NAME = "single_cycle_mips"
+
+def print_iverilog_compilation_errors(process_stderr):
+    missing_ports = []
+    
+    with process_stderr as f:
+      for line in f:
+        line = line.decode().strip()
+        if "not a port of {}".format(SINGLE_CYCLE_MIPS_TESTBENCH_INSTANCE_NAME) in line:
+          search_str = "``"
+          index = line.find(search_str)
+          port = line[index + len(search_str):]
+
+          search_str = "''"
+          index = port.find(search_str)
+          port = port[:index]
+
+          missing_ports.append(port)
+
+    if len(missing_ports):
+      for port in missing_ports:
+        print("Missing {0} port in {1}.v module".format(port, SINGLE_CYCLE_MIPS_MODULE_NAME))
+
+def print_vvp_results(process_stdout):
+  with process_stdout as f:
+    for line in f:
+      line = line.decode().strip()
       if "WARNING" in line or "VCD info" in line or "data memory" in line:
         continue
 
-      line = line.strip().split(" ")
-      line = list(filter(lambda x : len(x), line))
+      line = list(filter(lambda x : len(x), line.split(" ")))
       line = "{} {} {}{}".format(line[0], line[1], line[2], line[3])
       print(line)
+
+def execute_iverilog():
+  verilog_files = [f for f in os.listdir('.') if os.path.isfile(f) and f.endswith('.v')]
+  verilog_files = ' '.join(verilog_files)
+
+  iverilog_command = "iverilog -o {0} {1}".format(GENERATED_SIMULATION_FILE, verilog_files)
+  iverilog_command = shlex.split(iverilog_command)
+  
+  iverilog_process = subprocess.Popen(iverilog_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  iverilog_process_status = iverilog_process.wait()
+
+  return {
+    'process': iverilog_process,
+    'status': iverilog_process_status,
+    'stdout': iverilog_process.stdout,
+    'stderr': iverilog_process.stderr
+  }
+
+def execute_vvp():
+  vvp_command = shlex.split("vvp simv")
+  vvp_process = subprocess.Popen(vvp_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+  try:
+    vvp_process_status = vvp_process.wait(timeout = VVP_TIMEOUT_SECONDS)
+  except:
+    vvp_process_status = VVP_PROCESS_STATUS_TIMEOUT
+    vvp_process.kill()
+
+  return {
+    'process': vvp_process,
+    'status': vvp_process_status,
+    'stdout': vvp_process.stdout,
+    'stderr': vvp_process.stderr
+  }
+
+if __name__ == '__main__':
+  try:
+    os.remove(GENERATED_SIMULATION_FILE)
+  except FileNotFoundError:
+    pass
+
+  iverilog = execute_iverilog()
+
+  if (iverilog['status'] != IVERILOG_PROCESS_STATUS_SUCCESS):
+    print_iverilog_compilation_errors(iverilog['stderr'])
+    exit(PYTHON_EXIT_STATUSCODE_IVERILOG_PROCESS_COMPILATION_ERROR)
+
+  vvp = execute_vvp()
+
+  if (vvp['status'] == VVP_PROCESS_STATUS_TIMEOUT):
+    print("Error: Simulation ran indefinitely for {} seconds".format(VVP_TIMEOUT_SECONDS))
+    exit(PYTHON_EXIT_STATUSCODE_VVP_PROCESS_TIMEOUT)
+
+  if (vvp['status'] == VVP_PROCESS_STATUS_SUCCESS):
+    print_vvp_results(vvp['stdout'])
+    exit(PYTHON_EXIT_STATUSCODE_SIMULATION_SUCCESS)

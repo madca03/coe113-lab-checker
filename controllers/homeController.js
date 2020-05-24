@@ -7,13 +7,13 @@ const streamZip = require("node-stream-zip");
 
 exports.index = (req, res, next) => {
   res.render("home/index", {
-    title: "CoE113 Laboratory",
+    title: "CoE 113 Laboratory",
   });
 };
 
 exports.showlab4checker = (req, res, next) => {
   res.render("home/lab4checker", {
-    title: "CoE113 ME4 checker",
+    title: "CoE 113 ME4 checker",
     results: null,
   });
 };
