@@ -11,12 +11,13 @@ block content
           .container
             .alert.alert-danger(role="alert")= errorMessageTitle
           
-          - if (Array.isArray(errorMessage))
-            .container
-              ul.list-group
+            ul.list-group
+            - if (Array.isArray(errorMessage))
               - for (let i = 0; i < errorMessage.length; i++)
                 li.list-group-item.list-group-item-light.list-group-item-action= errorMessage[i]
+            - else
+              li.list-group-item.list-group-item-light.list-group-item-action= errorMessage
 
-            .container(style="margin: 1rem 0")
-              a(href="/lab4checker")
-                button.btn.btn-primary(type="button") Back to form
+          .container(style="margin: 1rem 0")
+            a(href="/lab4checker")
+              button.btn.btn-primary(type="button") Back to form
