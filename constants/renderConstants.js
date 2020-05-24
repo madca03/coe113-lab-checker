@@ -1,9 +1,12 @@
 "use strict";
 
 module.exports = {
-  ME4_TITLE: "CoE 113 ME4 Checker",
-  HOME_TITLE: "CoE 113 Laboratory",
+  HOME: {
+    PAGE_TITLE: "CoE 113 Laboratory",
+    PAGE_DESCRIPTION: "CoE 113 (Advanced Computer Organization) Laboratory",
+  },
   ME4: {
+    PAGE_TITLE: "CoE 113 ME4 Checker",
     COMPILE_ERROR: "Compile Error",
     SIMULATION_TIMEOUT: "Simulation Timeout",
     MISSING_TOP_LEVEL_MODULE: "Missing single_cycle_mips.v verilog module",

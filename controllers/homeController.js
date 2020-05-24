@@ -9,13 +9,14 @@ const renderConstants = require("../constants/renderConstants.js");
 
 exports.index = (req, res, next) => {
   res.render("home/index", {
-    title: renderConstants.HOME_TITLE,
+    title: renderConstants.HOME.PAGE_TITLE,
+    description: renderConstants.HOME.PAGE_DESCRIPTION
   });
 };
 
 exports.showlab4checker = (req, res, next) => {
   res.render("home/lab4checker", {
-    title: renderConstants.ME4_TITLE,
+    title: renderConstants.ME4.PAGE_TITLE,
     results: null,
   });
 };
@@ -92,12 +93,12 @@ exports.lab4checker = async (req, res, next) => {
 
       if (!hasRTLDirInZipFile) {
         res.render("home/lab4checkerResultError", {
-          title: renderConstants.ME4_TITLE,
+          title: renderConstants.ME4.PAGE_TITLE,
           errorMessageTitle: renderConstants.ME4.MISSING_RTL_FOLDER,
         });
       } else if (!hasTopLevelMipsVerilogFile) {
         res.render("home/lab4checkerResultError", {
-          title: renderConstants.ME4_TITLE,
+          title: renderConstants.ME4.PAGE_TITLE,
           errorMessageTitle: renderConstants.ME4.MISSING_TOP_LEVEL_MODULE,
         });
       }
@@ -143,7 +144,7 @@ exports.lab4checker = async (req, res, next) => {
                 });
 
               res.render("home/lab4checkerResultSuccess", {
-                title: renderConstants.ME4_TITLE,
+                title: renderConstants.ME4.PAGE_TITLE,
                 results: result,
               });
             })
