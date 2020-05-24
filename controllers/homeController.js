@@ -5,7 +5,7 @@ const path = require("path");
 const child_process = require("child_process");
 const streamZip = require("node-stream-zip");
 const me4PythonCheckerConstants = require("../constants/me4PythonCheckerConstants.js");
-const renderConstants = require("../constants/renderConstants.js")
+const renderConstants = require("../constants/renderConstants.js");
 
 exports.index = (req, res, next) => {
   res.render("home/index", {
@@ -82,7 +82,7 @@ exports.lab4checker = async (req, res, next) => {
           hasTopLevelMipsVerilogFile = true;
         }
 
-        const desc = entry.isDirectory ? "directory" : `${entry.size} bytes`;
+        // const desc = entry.isDirectory ? "directory" : `${entry.size} bytes`;
         // console.log(`Entry ${entry.name}: ${desc}`);
       }
 
@@ -93,12 +93,12 @@ exports.lab4checker = async (req, res, next) => {
       if (!hasRTLDirInZipFile) {
         res.render("home/lab4checkerResultError", {
           title: renderConstants.ME4_TITLE,
-          errorMessageTitle: renderConstants.ME4.MISSING_RTL_FOLDER
+          errorMessageTitle: renderConstants.ME4.MISSING_RTL_FOLDER,
         });
       } else if (!hasTopLevelMipsVerilogFile) {
         res.render("home/lab4checkerResultError", {
           title: renderConstants.ME4_TITLE,
-          errorMessageTitle: renderConstants.ME4.MISSING_TOP_LEVEL_MODULE
+          errorMessageTitle: renderConstants.ME4.MISSING_TOP_LEVEL_MODULE,
         });
       }
 
@@ -125,8 +125,6 @@ exports.lab4checker = async (req, res, next) => {
 
           runLab4Checker(rtlDir)
             .then((checkerResponse) => {
-              // console.log(checkerResponse);
-
               const result = checkerResponse.stdout
                 .split("\n")
                 .filter((instructionResult) => instructionResult.length)
@@ -153,13 +151,19 @@ exports.lab4checker = async (req, res, next) => {
               let errorMessage = null;
               let errorMessageTitle = null;
 
-              if (error.code === me4PythonCheckerConstants.STATUS.IVERILOG_PROCESS_COMPILATION_ERROR) {
-                errorMessage = error.stderr.split('\n').filter(x => x.length);
-                errorMessageTitle = renderConstants.ME4.COMPILE_ERROR
-              }
-              else if (error.code === me4PythonCheckerConstants.STATUS.VVP_PROCESS_TIMEOUT) {
+              if (
+                error.code ===
+                me4PythonCheckerConstants.STATUS
+                  .IVERILOG_PROCESS_COMPILATION_ERROR
+              ) {
+                errorMessage = error.stderr.split("\n").filter((x) => x.length);
+                errorMessageTitle = renderConstants.ME4.COMPILE_ERROR;
+              } else if (
+                error.code ===
+                me4PythonCheckerConstants.STATUS.VVP_PROCESS_TIMEOUT
+              ) {
                 errorMessage = error.stderr;
-                errorMessageTitle = renderConstants.ME4.SIMULATION_TIMEOUT
+                errorMessageTitle = renderConstants.ME4.SIMULATION_TIMEOUT;
               }
 
               res.render("home/lab4checkerResultError", {
@@ -167,17 +171,17 @@ exports.lab4checker = async (req, res, next) => {
                 errorMessageTitle,
                 errorMessage,
               });
-            })
-            .finally(() => {
-              // remove created directory inside uploads after simulation run
-              const removeSimulationDirectory = util.promisify(fs.rmdir);
-              const simulationPathDirectory = newUploadDirPath;
-              const options = { recursive: true };
-              removeSimulationDirectory(
-                simulationPathDirectory,
-                options
-              ).catch((error) => console.log(error));
             });
+          .finally(() => {
+            // remove created directory inside uploads after simulation run
+            const removeSimulationDirectory = util.promisify(fs.rmdir);
+            const simulationPathDirectory = newUploadDirPath;
+            const options = { recursive: true };
+            removeSimulationDirectory(
+              simulationPathDirectory,
+              options
+            ).catch((error) => console.log(error));
+          });
         });
       }
     });
@@ -204,9 +208,16 @@ async function deleteNewUploadDir(dirPath) {
 
 async function copyLab4CheckerToNewRTLDir(dirPath) {
   const checkerPath = path.join(__dirname, "..", "checkers", "me4");
+  const copyFileFunc = util.promisify(fs.copyFile);
+
+  const copyFileOperations = me4PythonCheckerConstants.FILES_USED_FOR_CHECKING.map(
+    (file) => {
+      copyFileFunc(path.join(checkerPath, file), path.join(dirPath, file));
+    }
+  );
 
   try {
-    await fs.copy(checkerPath, dirPath);
+    await Promise.all(copyFileOperations);
   } catch (err) {
     console.log(err);
   }
