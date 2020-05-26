@@ -174,7 +174,6 @@ exports.lab4checker = async (req, res, next) => {
               });
             })
             .finally(() => {
-              // remove created directory inside uploads after simulation run
               const removeSimulationDirectory = util.promisify(fs.rmdir);
               const simulationPathDirectory = newUploadDirPath;
               const options = { recursive: true };

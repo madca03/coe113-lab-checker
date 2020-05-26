@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import subprocess
+import argparse
 import shlex
 import os
 import time
@@ -27,10 +28,12 @@ SINGLE_CYCLE_MIPS_MODULE_NAME = "single_cycle_mips"
 
 def print_iverilog_compilation_errors(process_stderr):
     missing_ports = []
+    other_error_lines = []
     
     with process_stderr as f:
       for line in f:
         line = line.decode().strip()
+
         if "not a port of {}".format(SINGLE_CYCLE_MIPS_TESTBENCH_INSTANCE_NAME) in line:
           search_str = "``"
           index = line.find(search_str)
@@ -41,10 +44,16 @@ def print_iverilog_compilation_errors(process_stderr):
           port = port[:index]
 
           missing_ports.append(port)
+        else:
+          other_error_lines.append(line)
 
     if len(missing_ports):
       for port in missing_ports:
         print("Missing {0} port in {1}.v module".format(port, SINGLE_CYCLE_MIPS_MODULE_NAME), file=sys.stderr)
+    
+    if len(other_error_lines):
+      for line in other_error_lines:
+        print(line, file=sys.stderr)
 
 def print_vvp_results(process_stdout):
   with process_stdout as f:
@@ -57,11 +66,13 @@ def print_vvp_results(process_stdout):
       line = "{} {} {}{}".format(line[0], line[1], line[2], line[3])
       print(line)
 
-def execute_iverilog():
+def execute_iverilog(args = None):
   verilog_files = [f for f in os.listdir('.') if os.path.isfile(f) and f.endswith('.v')]
   verilog_files = ' '.join(verilog_files)
 
   iverilog_command = "iverilog -o {0} {1}".format(GENERATED_SIMULATION_FILE, verilog_files)
+  if (args.show_iverilog_command):
+    print("IVerilog command: {}".format(iverilog_command))
   iverilog_command = shlex.split(iverilog_command)
   
   iverilog_process = subprocess.Popen(iverilog_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -92,12 +103,16 @@ def execute_vvp():
   }
 
 if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-c', '--show-iverilog-command', action='store_true', help="Print the iverilog command used")
+  args = parser.parse_args()
+
   try:
     os.remove(GENERATED_SIMULATION_FILE)
   except FileNotFoundError:
     pass
 
-  iverilog = execute_iverilog()
+  iverilog = execute_iverilog(args)
 
   if (iverilog['status'] != IVERILOG_PROCESS.STATUS.SUCCESS):
     print_iverilog_compilation_errors(iverilog['stderr'])
