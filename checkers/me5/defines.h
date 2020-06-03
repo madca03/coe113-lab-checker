@@ -1,0 +1,5 @@
+`define CLK_PERIOD 20
+`define INPUT_DELAY 5
+`define MEM_DEPTH 16384
+`define MEM_WIDTH 8
+`define WORD_WIDTH 32
