@@ -1,4 +1,36 @@
 extends ../layout
 
 block content
-  h1= title
+  .container
+    .row.justify-content-center
+      .card(style="width:70%")
+        .card-header
+          p.text-center.text-dark(style="font-size:3rem")= title
+        .card-body
+
+        - if (results === null || results.length === 0)
+          .container(style="margin-bottom:1rem")
+            ul.list-group
+              li.list-group-item.list-group-item-dark.text-center 
+                span.h4 Instructions on how to use this checker
+              li.list-group-item.list-group-item-light.list-group-item-action 1. Upload a zip file containing your RTL files only.
+                strong Do not include the datamem.v and instmem.v files as those are part of our testbench.
+              li.list-group-item.list-group-item-light.list-group-item-action 2. The name of the zip file should be 
+                strong rtl.zip
+              li.list-group-item.list-group-item-light.list-group-item-action 3. The zip file should contain 
+                strong one directory named rtl 
+                | which should contain all of your RTL files
+              li.list-group-item.list-group-item-light.list-group-item-action 4. Inside that rtl directory, there should be a verilog file named 
+                strong pipelined_mips.v
+
+          .container(style="margin-bottom:1rem")
+            form(action="/lab5checker", method="POST", enctype="multipart/form-data")
+              .form-row.justify-content-center
+                .col-5
+                  .custom-file
+                    input.custom-file-input#customFile(type="file", name="rtlFile", accept=".zip")
+                    label.custom-file-label(for="customFile") Choose file
+                  
+                button.btn.btn-primary#rtlSubmit(type="submit") Submit file
+          
+  script(src="./javascripts/fileupload.js")
