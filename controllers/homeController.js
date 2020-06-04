@@ -72,22 +72,32 @@ exports.lab4checker = async (req, res, next) => {
         zip.on("ready", () => {
             // console.log(`Entries read: ${zip.entriesCount}`);
 
-            // read the contents of the zip file before extraction
-            for (const entry of Object.values(zip.entries())) {
-                // check for the existence of the "rtl" directory in the extracted zip file
-                if (entry.isDirectory && entry.name === RTLDirInZipFile) {
-                    hasRTLDirInZipFile = true;
-                }
+            if (zip.entriesCount === 1) 
+            {
+                const entry = Object.values(zip.entries())[0]
+                hasRTLDirInZipFile = entry.name.includes("rtl/");
+                hasTopLevelMipsVerilogFile = entry.name.includes(topLevelMipsVerilogFile);
+            } 
+            else 
+            {
+                // read the contents of the zip file before extraction
+                for (const entry of Object.values(zip.entries())) {
+                    // check for the existence of the "rtl" directory in the extracted zip file
+                    if (entry.isDirectory && entry.name === RTLDirInZipFile) {
+                        hasRTLDirInZipFile = true;
+                    }
 
-                // check for the existence of the top level verilog file in the extracted zip file
-                if (!entry.isDirectory && entry.name === topLevelMipsVerilogFile) {
-                    hasTopLevelMipsVerilogFile = true;
-                }
+                    // check for the existence of the top level verilog file in the extracted zip file
+                    if (!entry.isDirectory && entry.name === topLevelMipsVerilogFile) {
+                        hasTopLevelMipsVerilogFile = true;
+                    }
 
-                // const desc = entry.isDirectory ? "directory" : `${entry.size} bytes`;
-                // console.log(`Entry ${entry.name}: ${desc}`);
+                    // const desc = entry.isDirectory ? "directory" : `${entry.size} bytes`;
+                    // console.log(`Entry ${entry.name}: ${desc}`);
+                }
             }
 
+           
             if (!hasRTLDirInZipFile || !hasTopLevelMipsVerilogFile) {
                 deleteNewUploadDir(newUploadDirPath);
             }
