@@ -1,0 +1,35 @@
+extends ../layout
+
+block content
+  .container
+    .row.justify-content-center
+      .card(style="width:70%")
+        .card-header
+          p.text-center.text-dark(style="font-size:3rem")= title
+        .card-body
+
+          .container
+            .row.justify-content-center
+              .col-10
+                p.h3 Results
+
+          - if (results !== null && results.length)
+            .row.justify-content-center
+              .col-10
+                table.table.table-hover
+                  thead
+                    tr
+                      th Instruction
+                      th Passed / Failed
+                      th # of test cases passed
+                      th # of test cases
+                  tbody
+                    - for (let result of results)
+                      tr
+                        td= result.inst
+                        td= result.passed ? "Pass" : "Fail"
+                        td= result.score
+                        td= result.test_length
+                
+                a(href="/lab5checker")
+                  button.btn.btn-primary(type="button") Back to form
