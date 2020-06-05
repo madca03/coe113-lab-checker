@@ -24,6 +24,17 @@ block content
                 strong pipelined_mips.v
 
           .container(style="margin-bottom:1rem")
+            ul.list-group
+              li.list-group-item.list-group-item-dark.text-center 
+                span.h4 Minimum specifications
+              li.list-group-item.list-group-item-light.list-group-item-action As stated in our earlier announcements in UvLE, the minimum specification
+                | for this machine exercise is 
+                strong a working LW/SW instructions 
+                | meaning when you use this checker, you need to have a 
+                strong PASS 
+                | remark for the LW/SW test cases, otherwise your code will not be considered to have met the minimum specifications.
+
+          .container(style="margin-bottom:1rem")
             form(action="/lab5checker", method="POST", enctype="multipart/form-data")
               .form-row.justify-content-center
                 .col-5
