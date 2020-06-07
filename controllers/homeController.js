@@ -261,8 +261,8 @@ exports.lab5checker = async (req, res, next) => {
             if (zip.entriesCount === 1) 
             {
                 const entry = Object.values(zip.entries())[0].name.split("/")
-                hasRTLDirInZipFile = entry[0] === "rtl"
-                hasTopLevelMipsVerilogFile = entry[1] === topLevelMipsVerilogFile
+                hasRTLDirInZipFile = entry.name.includes("rtl/");
+                hasTopLevelMipsVerilogFile = entry.name.includes(topLevelMipsVerilogFile);
             }
             else
             {
